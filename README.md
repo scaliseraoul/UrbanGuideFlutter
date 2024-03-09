@@ -9,7 +9,7 @@ https://pub.dev/packages/mapbox_maps_flutter
 
 Extract from the guide:
 
-###Secret token
+### Secret token
 To access platform SDKs you will need to create a secret access token with the Downloads:Read scope and then:
 
 1. to download the Android SDK add the token configuration to ~/.gradle/gradle.properties :
@@ -20,7 +20,7 @@ machine api.mapbox.com
 login mapbox
 password YOUR_SECRET_MAPBOX_ACCESS_TOKEN
 
-###Public token
+### Public token
 flutter run --dart-define PUBLIC_ACCESS_TOKEN=...
 
 You can set this in the run configuration on Android Studio:
