@@ -93,7 +93,7 @@ class _UrbanGuideState extends State<UrbanGuide> {
           inAppAlertStopwatch.stop();
           final elapsedTime = inAppAlertStopwatch.elapsedMilliseconds * 1000;
           final mqttPayload =
-              "${event.timestampSent},${getOsString()},Flutter,MapBox,${Topics.InAppAlert.name},0,0,$elapsedTime";
+              "${event.timestampSent},${getOsString()},Flutter,-,${Topics.InAppAlert.name},0,0,$elapsedTime";
           _mqttManager.publish(
               "${getOsString()}Flutter${Topics.InAppAlert.name}Complete",
               mqttPayload);
@@ -110,7 +110,7 @@ class _UrbanGuideState extends State<UrbanGuide> {
       inAppNotificationStopwatch.stop();
       final elapsedTime = inAppNotificationStopwatch.elapsedMilliseconds * 1000;
       final mqttPayload =
-          "${event.timestampSent},${getOsString()},Flutter,MapBox,${Topics.InAppNotification.name},0,0,$elapsedTime";
+          "${event.timestampSent},${getOsString()},Flutter,-,${Topics.InAppNotification.name},0,0,$elapsedTime";
       _mqttManager.publish(
           "${getOsString()}Flutter${Topics.InAppNotification.name}Complete",
           mqttPayload);
