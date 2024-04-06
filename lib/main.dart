@@ -62,6 +62,21 @@ class _UrbanGuideState extends State<UrbanGuide> {
               Topics.DrawPoint.name, payload["timestamp"]);
           _eventController.add(event);
           break;
+        case Topics.DrawPointBatch:
+          List<DrawPointEvent> events = [];
+          List<dynamic> rawlist = payload["list"];
+          for (var item in rawlist) {
+            // Extracting data for each point
+            double lat = item['lat'];
+            double lang = item['lang'];
+            LatLng position = LatLng(lat, lang);
+            final event = DrawPointEvent(item["title"], position,
+                Topics.DrawPoint.name, item["timestamp"]);
+            events.add(event);
+          }
+          final batchEvent = DrawPointBatchEvent(events,payload["timestamp"]);
+          _eventController.add(batchEvent);
+          break;
         case Topics.InAppNotification:
           final event = InAppNotificationEvent(
               payload["title"],

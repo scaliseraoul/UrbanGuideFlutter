@@ -28,11 +28,16 @@ class _MapboxMapComponentState extends State<MapboxMapComponent> {
     mapController = controller;
     MQTTManager mqttManager = widget.mqttManager;
     String baseTopic = MapboxMapComponent.baseTopic;
+
     mqttManager.subscribe("$baseTopic${Topics.DrawPoint.name}Receive");
+    mqttManager.subscribe("$baseTopic${Topics.DrawPointBatch.name}Receive");
     mqttManager.subscribe("$baseTopic${Topics.MoveMap.name}Receive");
+
     Stream<MqttEvent> eventStream = widget.eventStream;
     eventStream.listen((event) {
-      if (event is DrawPointEvent) {
+      if (event is DrawPointBatchEvent) {
+        addBatchMarkers(event);
+      } else if (event is DrawPointEvent) {
         addMarkers(event);
       } else if (event is MoveMapEvent) {
         moveMap(event);
@@ -70,15 +75,38 @@ class _MapboxMapComponentState extends State<MapboxMapComponent> {
     addMarkerStopwatch.reset();
   }
 
+  void addBatchMarkers(DrawPointBatchEvent event) {
+    Stopwatch addMarkerStopwatch = Stopwatch()..start();
+
+    final eventList = event.events;
+
+    for (var event in eventList) {
+      mapController.addSymbol(SymbolOptions(
+        geometry: event.position,
+        textField: event.title,
+        iconImage: "blue-marker",
+        iconSize: 4.0,
+      ));
+    }
+
+    final elapsedTime = addMarkerStopwatch.elapsedMicroseconds * 1000;
+    MQTTManager mqttManager = widget.mqttManager;
+    final mqttPayload =
+        "${event.timestampSent},${getOsString()},Flutter,MapBox,${Topics.DrawPointBatch.name},0,0,$elapsedTime";
+
+    mqttManager.publish(
+        "${MapboxMapComponent.baseTopic}${Topics.DrawPointBatch.name}Complete",
+        mqttPayload);
+    addMarkerStopwatch.reset();
+  }
+
   void moveMap(MoveMapEvent event) {
     timestampSent = event.timestampSent;
     registerMotion = true;
     moveMapStopwatch.start();
     mapController.moveCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
-        target: event.position,
-        zoom: 15.0,
-      ),
+          target: event.position, zoom: 15.0, tilt: 45.0, bearing: 45.0),
     ));
   }
 
@@ -105,17 +133,17 @@ class _MapboxMapComponentState extends State<MapboxMapComponent> {
   @override
   Widget build(BuildContext context) {
     return MapboxMap(
-      onMapCreated: _onMapCreated,
-      onStyleLoadedCallback: _onStyleLoaded,
-      onCameraIdle: onCameraIdle,
-      accessToken: const String.fromEnvironment("ACCESS_TOKEN"),
-      initialCameraPosition: const CameraPosition(
-        target: LatLng(44.646469, 10.925139),
-        zoom: 15.0,
-      ),
-      compassEnabled: false,
-      myLocationEnabled: false,
-      myLocationTrackingMode: MyLocationTrackingMode.None,
-    );
+        onMapCreated: _onMapCreated,
+        onStyleLoadedCallback: _onStyleLoaded,
+        onCameraIdle: onCameraIdle,
+        accessToken: const String.fromEnvironment("ACCESS_TOKEN"),
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(44.646469, 10.925139),
+          zoom: 15.0,
+        ),
+        compassEnabled: false,
+        myLocationEnabled: false,
+        myLocationTrackingMode: MyLocationTrackingMode.None,
+        styleString: MapboxStyles.LIGHT);
   }
 }

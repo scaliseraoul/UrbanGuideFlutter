@@ -5,6 +5,7 @@ import 'utils.dart';
 
 enum Topics {
   DrawPoint,
+  DrawPointBatch,
   InAppAlert,
   InAppNotification,
   MoveMap,
@@ -14,7 +15,9 @@ enum Topics {
 extension TopicsExtension on String {
   Topics toTopic() {
     final lowerCaseString = toLowerCase();
-    if (lowerCaseString.contains('drawpoint')) {
+    if (lowerCaseString.contains('drawpointbatch')) {
+      return Topics.DrawPointBatch;
+    }else if (lowerCaseString.contains('drawpoint')) {
       return Topics.DrawPoint;
     } else if (lowerCaseString.contains('inappalert')) {
       return Topics.InAppAlert;
@@ -37,6 +40,13 @@ class DrawPointEvent extends MqttEvent {
   final String timestampSent;
 
   DrawPointEvent(this.title, this.position, this.topic, this.timestampSent);
+}
+
+class DrawPointBatchEvent extends MqttEvent {
+  final List<DrawPointEvent> events;
+  final String timestampSent;
+
+  DrawPointBatchEvent(this.events, this.timestampSent);
 }
 
 class MoveMapEvent extends MqttEvent {
